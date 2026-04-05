@@ -1130,7 +1130,8 @@ Responda em português clínico formal, conciso.`;
     populatePDF();
 
   } catch (err) {
-    document.getElementById('ai-status').innerHTML = '<span style="color:var(--color-text-danger, #C53030)">Erro ao consultar IA. Verifique a conexão.</span>';
+    console.error("Erro na API:", err);
+    document.getElementById('ai-status').innerHTML = '<span style="color:var(--color-text-danger, #C53030)">Erro ao consultar IA: ' + (err.message || 'Verifique a conexão (F12 para detalhes).') + '</span>';
   }
 };
 
