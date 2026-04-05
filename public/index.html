@@ -1,0 +1,1275 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .vm-root {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+  }
+
+  .vm-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    padding-bottom: 1rem;
+  }
+  .vm-logo {
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--color-text-primary);
+  }
+  .vm-logo span {
+    color: #185FA5;
+  }
+  .vm-subtitle {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .vm-steps {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+  }
+  .vm-step {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-background-secondary);
+    transition: background 0.3s;
+  }
+  .vm-step.active { background: #185FA5; }
+  .vm-step.done { background: #1D9E75; }
+
+  .vm-stage { display: none; }
+  .vm-stage.visible { display: block; }
+
+  .vm-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .vm-upload-zone {
+    border: 1px dashed var(--color-border-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--color-background-primary);
+  }
+  .vm-upload-zone:hover {
+    border-color: #185FA5;
+    background: #E6F1FB22;
+  }
+  .vm-upload-zone.drag { border-color: #185FA5; background: #E6F1FB33; }
+
+  .vm-upload-icon {
+    width: 40px; height: 40px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--color-background-secondary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vm-upload-icon svg { width: 20px; height: 20px; stroke: var(--color-text-secondary); fill: none; stroke-width: 1.5; }
+
+  .vm-upload-text { font-size: 14px; color: var(--color-text-primary); margin-bottom: 4px; }
+  .vm-upload-hint { font-size: 12px; color: var(--color-text-secondary); }
+
+  .vm-preview-wrap {
+    position: relative;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 1rem;
+  }
+  .vm-preview-wrap img {
+    width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    display: block;
+  }
+  .vm-preview-wrap canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  .vm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .vm-btn:hover { background: var(--color-background-secondary); }
+  .vm-btn:active { transform: scale(0.98); }
+  .vm-btn.primary {
+    background: #185FA5;
+    color: #fff;
+    border-color: #185FA5;
+  }
+  .vm-btn.primary:hover { background: #0C447C; }
+  .vm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .vm-row { display: flex; gap: 8px; align-items: center; margin-top: 1rem; }
+
+  .vm-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .vm-metric-card {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 12px 14px;
+  }
+  .vm-metric-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+  .vm-metric-value {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+  }
+  .vm-metric-unit {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+  }
+  .vm-metric-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .badge-ok { background: #EAF3DE; color: #3B6D11; }
+  .badge-warn { background: #FAEEDA; color: #854F0B; }
+  .badge-info { background: #E6F1FB; color: #185FA5; }
+
+  .vm-section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .vm-ai-box {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem 1.25rem;
+    background: var(--color-background-primary);
+    min-height: 80px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+  }
+
+  .vm-spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--color-border-secondary);
+    border-top-color: #185FA5;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .vm-status {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .vm-pdf-preview {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    background: var(--color-background-primary);
+  }
+  .vm-pdf-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .vm-pdf-body {
+    padding: 1.5rem;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .vm-pdf-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .vm-pdf-row:last-child { border-bottom: none; }
+  .vm-pdf-key { color: var(--color-text-secondary); }
+  .vm-pdf-val { font-weight: 500; color: var(--color-text-primary); }
+
+  .vm-info-bar {
+    background: #E6F1FB;
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #185FA5;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .vm-patient-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .vm-field { display: flex; flex-direction: column; gap: 4px; }
+  .vm-field label { font-size: 11px; color: var(--color-text-secondary); letter-spacing: 0.05em; text-transform: uppercase; }
+  .vm-field input, .vm-field select {
+    padding: 7px 10px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-size: 13px;
+  }
+  .vm-field input:focus, .vm-field select:focus {
+    outline: none;
+    border-color: #185FA5;
+  }
+
+  .vm-stage-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .vm-stage-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #185FA5;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .vm-stage-name { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+  .vm-stage-desc { font-size: 12px; color: var(--color-text-secondary); }
+
+  .vm-landmark-status {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vm-landmark-status .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-loading { background: #D4A017; animation: pulse-dot 1s ease-in-out infinite; }
+  .dot-ok { background: #1D9E75; }
+  .dot-err { background: #C53030; }
+  @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  @media (max-width: 600px) {
+    .vm-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .vm-patient-fields { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="vm-root">
+  <div class="vm-header">
+    <div class="vm-logo">VISAGE<span>MED</span></div>
+    <div class="vm-subtitle">Análise Facial Geométrica · Pipeline Clínico</div>
+  </div>
+
+  <div class="vm-steps">
+    <div class="vm-step active" id="step-1"></div>
+    <div class="vm-step" id="step-2"></div>
+    <div class="vm-step" id="step-3"></div>
+    <div class="vm-step" id="step-4"></div>
+    <div class="vm-step" id="step-5"></div>
+  </div>
+
+  <!-- Stage 1: Patient Info -->
+  <div class="vm-stage visible" id="stage-1">
+    <div class="vm-stage-header">
+      <div class="vm-stage-num">1</div>
+      <div>
+        <div class="vm-stage-name">Dados do paciente</div>
+        <div class="vm-stage-desc">Identificação para o relatório clínico</div>
+      </div>
+    </div>
+    <div class="vm-patient-fields">
+      <div class="vm-field" style="grid-column: 1 / -1;">
+        <label>Nome completo</label>
+        <input type="text" id="p-nome" placeholder="Ex: Maria Silva Santos" />
+      </div>
+      <div class="vm-field">
+        <label>Data de nascimento</label>
+        <input type="date" id="p-nasc" />
+      </div>
+      <div class="vm-field">
+        <label>Sexo</label>
+        <select id="p-sexo">
+          <option value="">Selecionar</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="vm-field" style="grid-column: 1 / -1;">
+        <label>Queixa principal / motivo da consulta</label>
+        <input type="text" id="p-queixa" placeholder="Ex: Análise pré-procedimento estético" />
+      </div>
+    </div>
+    <div class="vm-row" style="justify-content: flex-end;">
+      <button class="vm-btn primary" onclick="goStage(2)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- Stage 2: Image Upload -->
+  <div class="vm-stage" id="stage-2">
+    <div class="vm-stage-header">
+      <div class="vm-stage-num">2</div>
+      <div>
+        <div class="vm-stage-name">Captura da imagem</div>
+        <div class="vm-stage-desc">Foto frontal padronizada (fundo neutro, iluminação uniforme)</div>
+      </div>
+    </div>
+    <div class="vm-info-bar">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><path d="M8 7v5M8 5h.01"/></svg>
+      Posição: Frankfurt horizontal · Resolução mínima: 1024×768 px · MediaPipe Face Landmarker (478 landmarks)
+    </div>
+    <div class="vm-upload-zone" id="vm-drop" onclick="document.getElementById('vm-file').click()">
+      <input type="file" id="vm-file" accept="image/*" style="display:none" onchange="handleFile(event)" />
+      <div class="vm-upload-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="vm-upload-text">Carregar foto do paciente</div>
+      <div class="vm-upload-hint">JPG, PNG · arraste ou clique</div>
+    </div>
+    <div id="vm-preview-container" style="display:none; margin-top:1rem;">
+      <div class="vm-preview-wrap">
+        <img id="vm-preview-img" alt="preview" />
+        <canvas id="vm-canvas-overlay"></canvas>
+      </div>
+    </div>
+    <div id="vm-landmark-status" class="vm-landmark-status" style="display:none;">
+      <div class="dot dot-loading" id="lm-dot"></div>
+      <span id="lm-text">Carregando MediaPipe Face Landmarker...</span>
+    </div>
+    <div class="vm-row" style="justify-content: space-between; margin-top: 1rem;">
+      <button class="vm-btn" onclick="goStage(1)">← Voltar</button>
+      <button class="vm-btn primary" id="btn-analisar" onclick="runAnalysis()" disabled>Analisar face →</button>
+    </div>
+  </div>
+
+  <!-- Stage 3: Geometric Metrics -->
+  <div class="vm-stage" id="stage-3">
+    <div class="vm-stage-header">
+      <div class="vm-stage-num">3</div>
+      <div>
+        <div class="vm-stage-name">Métricas geométricas</div>
+        <div class="vm-stage-desc">Proporções, simetria e ângulos calculados via 478 landmarks reais</div>
+      </div>
+    </div>
+
+    <div id="stage3-loading" style="text-align:center; padding:2rem;">
+      <div class="vm-spinner"></div>
+      <div style="font-size:13px; color:var(--color-text-secondary); margin-top:12px;" id="stage3-loading-text">Processando landmarks faciais com MediaPipe...</div>
+    </div>
+
+    <div id="stage3-content" style="display:none;">
+      <div class="vm-preview-wrap" style="margin-bottom:1rem;">
+        <img id="vm-preview-img2" style="width:100%; max-height:300px; object-fit:contain; display:block;" />
+        <canvas id="vm-canvas-metrics"></canvas>
+      </div>
+
+      <p class="vm-label" style="margin-bottom:12px;">Proporções faciais</p>
+      <div class="vm-metrics-grid" id="metrics-grid"></div>
+
+      <p class="vm-label" style="margin-top:1rem; margin-bottom:12px;">Simetria e ângulos</p>
+      <div class="vm-metrics-grid" id="metrics-grid2"></div>
+    </div>
+
+    <div class="vm-row" style="justify-content: space-between; margin-top: 1rem;">
+      <button class="vm-btn" onclick="goStage(2)">← Voltar</button>
+      <button class="vm-btn primary" id="btn-ai" onclick="runAI()" disabled>Interpretar com IA →</button>
+    </div>
+  </div>
+
+  <!-- Stage 4: AI Interpretation -->
+  <div class="vm-stage" id="stage-4">
+    <div class="vm-stage-header">
+      <div class="vm-stage-num">4</div>
+      <div>
+        <div class="vm-stage-name">Interpretação clínica</div>
+        <div class="vm-stage-desc">Análise gerada por IA com base nas métricas geométricas reais</div>
+      </div>
+    </div>
+
+    <div class="vm-status" id="ai-status" style="margin-bottom:1rem;">
+      <div class="vm-spinner"></div>
+      <span>Consultando IA clínica...</span>
+    </div>
+
+    <div id="ai-result-wrap" style="display:none;">
+      <div class="vm-ai-box" id="ai-result"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:1rem;">
+        <div class="vm-metric-card">
+          <div class="vm-metric-label">Formato facial predominante</div>
+          <div class="vm-metric-value" id="ai-formato" style="font-size:16px;">—</div>
+        </div>
+        <div class="vm-metric-card">
+          <div class="vm-metric-label">Classificação de simetria</div>
+          <div class="vm-metric-value" id="ai-simetria" style="font-size:16px;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vm-row" style="justify-content: space-between; margin-top: 1rem;">
+      <button class="vm-btn" onclick="goStage(3)">← Voltar</button>
+      <button class="vm-btn primary" id="btn-relatorio" onclick="goStage(5)" disabled>Gerar relatório →</button>
+    </div>
+  </div>
+
+  <!-- Stage 5: PDF Report -->
+  <div class="vm-stage" id="stage-5">
+    <div class="vm-stage-header">
+      <div class="vm-stage-num">5</div>
+      <div>
+        <div class="vm-stage-name">Relatório clínico</div>
+        <div class="vm-stage-desc">Documento formal para prontuário e impressão</div>
+      </div>
+    </div>
+
+    <div class="vm-pdf-preview" id="pdf-preview">
+      <div class="vm-pdf-header">
+        <div>
+          <div style="font-size:15px; font-weight:500; color:var(--color-text-primary);">VISAGEMED — Laudo de Análise Facial Geométrica</div>
+          <div style="font-size:11px; color:var(--color-text-secondary); margin-top:2px;" id="pdf-date"></div>
+        </div>
+        <div style="font-size:11px; color:var(--color-text-secondary); text-align:right;">
+          Dr. Paulo Reis Vulpi<br>
+          CRM-MT 8274 · RQE 6055
+        </div>
+      </div>
+      <div class="vm-pdf-body">
+        <p class="vm-section-title" style="margin-bottom:10px;">1. Identificação</p>
+        <div class="vm-pdf-row"><span class="vm-pdf-key">Paciente</span><span class="vm-pdf-val" id="pdf-nome">—</span></div>
+        <div class="vm-pdf-row"><span class="vm-pdf-key">Data de nascimento</span><span class="vm-pdf-val" id="pdf-nasc">—</span></div>
+        <div class="vm-pdf-row"><span class="vm-pdf-key">Sexo</span><span class="vm-pdf-val" id="pdf-sexo">—</span></div>
+        <div class="vm-pdf-row"><span class="vm-pdf-key">Motivo</span><span class="vm-pdf-val" id="pdf-queixa">—</span></div>
+
+        <p class="vm-section-title" style="margin-top:1rem; margin-bottom:10px;">2. Métricas geométricas</p>
+        <div id="pdf-metrics-list"></div>
+
+        <p class="vm-section-title" style="margin-top:1rem; margin-bottom:10px;">3. Interpretação clínica</p>
+        <div style="font-size:13px; line-height:1.7; color:var(--color-text-primary); white-space:pre-wrap;" id="pdf-ai-text">—</div>
+
+        <p class="vm-section-title" style="margin-top:1rem; margin-bottom:10px;">4. Conclusão</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:8px 12px;">
+            <span class="vm-pdf-key">Formato facial</span><br>
+            <span class="vm-pdf-val" id="pdf-formato">—</span>
+          </div>
+          <div style="background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:8px 12px;">
+            <span class="vm-pdf-key">Classificação de simetria</span><br>
+            <span class="vm-pdf-val" id="pdf-simetria">—</span>
+          </div>
+        </div>
+
+        <div style="margin-top:2rem; padding-top:1rem; border-top:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary);">
+          Documento gerado pelo sistema VISAGEMED · Análise via MediaPipe Face Landmarker (478 landmarks) · Uso exclusivo para documentação clínica · Dr. Paulo Reis Vulpi · CRM-MT 8274
+        </div>
+      </div>
+    </div>
+
+    <div class="vm-row" style="justify-content: space-between; margin-top: 1rem;">
+      <button class="vm-btn" onclick="goStage(4)">← Voltar</button>
+      <div style="display:flex; gap:8px;">
+        <button class="vm-btn" onclick="printReport()">Imprimir</button>
+        <button class="vm-btn primary" onclick="downloadPDF()">Baixar PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="module">
+// ═══════════════════════════════════════════════════════════════
+// VISAGEMED — Pipeline Geométrico com MediaPipe Real
+// ═══════════════════════════════════════════════════════════════
+
+import { FaceLandmarker, FilesetResolver, DrawingUtils } from
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs";
+
+// ── State ──
+let currentStage = 1;
+let imageDataURL = null;
+let computedMetrics = null;
+let rawLandmarks = null;
+let aiText = '';
+let aiFormato = '';
+let aiSimetria = '';
+let faceLandmarker = null;
+let mediapipeReady = false;
+
+// ── Init MediaPipe ──
+async function initMediaPipe() {
+  try {
+    const vision = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
+    );
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        delegate: "GPU"
+      },
+      runningMode: "IMAGE",
+      numFaces: 1,
+      outputFaceBlendshapes: false,
+      outputFacialTransformationMatrixes: false
+    });
+    mediapipeReady = true;
+    console.log("MediaPipe Face Landmarker ready (478 landmarks)");
+  } catch (err) {
+    console.error("MediaPipe init error:", err);
+    // Fallback to CPU
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
+      );
+      faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+          delegate: "CPU"
+        },
+        runningMode: "IMAGE",
+        numFaces: 1,
+        outputFaceBlendshapes: false,
+        outputFacialTransformationMatrixes: false
+      });
+      mediapipeReady = true;
+      console.log("MediaPipe ready (CPU fallback)");
+    } catch (err2) {
+      console.error("MediaPipe CPU fallback failed:", err2);
+    }
+  }
+}
+
+initMediaPipe();
+
+// ── Landmark Index Map (MediaPipe 478) ──
+// Referências anatômicas mapeadas para os índices corretos do Face Landmarker
+const LM = {
+  // Linha média
+  glabela: 9,
+  nasion: 168,        // raiz nasal (entre olhos)
+  pronasale: 4,       // ponta do nariz
+  subnasale: 2,       // base do nariz (columela)
+  labialeSuperior: 0, // ponto mais alto do lábio superior (cupido)
+  stomion: 13,        // ponto de fechamento labial
+  labialInferior: 17, // ponto mais baixo do lábio inferior
+  mentonian: 152,     // ponto mais inferior do mento
+  gnathion: 152,      // sinônimo clínico
+
+  // Trichion (aproximado - ponto mais alto detectado na testa)
+  trichion: 10,       // ponto superior da testa
+
+  // Pontos laterais - Zigomático (BiZy)
+  zigoRight: 234,     // ponto mais lateral do arco zigomático direito
+  zigoLeft: 454,      // ponto mais lateral do arco zigomático esquerdo
+
+  // Pontos laterais - Gonial (BiGo)
+  gonionRight: 172,   // ângulo mandibular direito
+  gonionLeft: 397,    // ângulo mandibular esquerdo
+
+  // Olhos - cantos
+  cantusRightLateral: 33,   // canto externo olho direito
+  cantusRightMedial: 133,   // canto interno olho direito
+  cantusLeftMedial: 362,    // canto interno olho esquerdo
+  cantusLeftLateral: 263,   // canto externo olho esquerdo
+
+  // Sobrancelhas
+  browRightLateral: 46,
+  browRightMedial: 107,
+  browLeftMedial: 336,
+  browLeftLateral: 276,
+
+  // Nariz - asas
+  alarRight: 129,     // asa nasal direita
+  alarLeft: 358,      // asa nasal esquerda
+
+  // Lábios - comissuras
+  chelionRight: 61,   // comissura labial direita
+  chelionLeft: 291,   // comissura labial esquerda
+
+  // Dorso nasal para ângulo nasofrontal
+  dorsumNasi: 6,      // ponto no dorso nasal
+
+  // Columela / base nasal para ângulo nasolabial
+  columella: 2,       // base da columela
+
+  // Íris (landmarks 468-477, disponíveis com refine)
+  irisRightCenter: 468,
+  irisLeftCenter: 473,
+};
+
+// ── Geometric Calculations ──
+function dist2D(a, b) {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+function angleBetween3Points(a, vertex, b) {
+  // Ângulo no vértice entre vetores vertex→a e vertex→b
+  const va = { x: a.x - vertex.x, y: a.y - vertex.y };
+  const vb = { x: b.x - vertex.x, y: b.y - vertex.y };
+  const dot = va.x * vb.x + va.y * vb.y;
+  const magA = Math.sqrt(va.x ** 2 + va.y ** 2);
+  const magB = Math.sqrt(vb.x ** 2 + vb.y ** 2);
+  if (magA === 0 || magB === 0) return 0;
+  const cosAngle = Math.max(-1, Math.min(1, dot / (magA * magB)));
+  return Math.acos(cosAngle) * (180 / Math.PI);
+}
+
+function midpoint(a, b) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+function computeRealMetrics(landmarks) {
+  const lm = landmarks;
+  const p = (idx) => lm[idx]; // retorna {x, y, z}
+
+  // ── Larguras ──
+  const larguraBizigomatic = dist2D(p(LM.zigoRight), p(LM.zigoLeft));
+  const larguraBigonial = dist2D(p(LM.gonionRight), p(LM.gonionLeft));
+
+  // ── Altura facial ──
+  const alturaFacial = dist2D(p(LM.trichion), p(LM.mentonian));
+
+  // ── Terços faciais ──
+  const tercoSuperiorDist = dist2D(p(LM.trichion), p(LM.nasion));
+  const tercoMedioDist = dist2D(p(LM.nasion), p(LM.subnasale));
+  const tercoInferiorDist = dist2D(p(LM.subnasale), p(LM.mentonian));
+  const somaTermos = tercoSuperiorDist + tercoMedioDist + tercoInferiorDist;
+
+  const tercoSuperior = (tercoSuperiorDist / somaTermos) * 100;
+  const tercoMedio = (tercoMedioDist / somaTermos) * 100;
+  const tercoInferior = (tercoInferiorDist / somaTermos) * 100;
+
+  // ── Índice facial (altura / largura bizigomática) ──
+  const indiceFacial = alturaFacial / larguraBizigomatic;
+
+  // ── Proporção áurea facial (largura bizigomática / altura facial) ──
+  const proporcaoAurea = larguraBizigomatic / alturaFacial;
+
+  // ── Razão BiZy / BiGo ──
+  const razaoBiZiBiGo = larguraBigonial / larguraBizigomatic;
+
+  // ── Simetria horizontal (comparação distâncias laterais ao eixo médio) ──
+  const midFace = midpoint(p(LM.nasion), p(LM.mentonian));
+  const distZigoRight = dist2D(midFace, p(LM.zigoRight));
+  const distZigoLeft = dist2D(midFace, p(LM.zigoLeft));
+  const simetriaH = (1 - Math.abs(distZigoRight - distZigoLeft) / Math.max(distZigoRight, distZigoLeft)) * 100;
+
+  // ── Simetria vertical (comparação olhos) ──
+  const midOlhoRight = midpoint(p(LM.cantusRightLateral), p(LM.cantusRightMedial));
+  const midOlhoLeft = midpoint(p(LM.cantusLeftLateral), p(LM.cantusLeftMedial));
+  // Diferença de altura Y dos centros oculares em relação à largura interocular
+  const interocularDist = dist2D(midOlhoRight, midOlhoLeft);
+  const deltaYOlhos = Math.abs(midOlhoRight.y - midOlhoLeft.y);
+  const simetriaV = (1 - deltaYOlhos / (interocularDist || 1)) * 100;
+
+  // ── Ângulo nasofrontal ──
+  // Vértice no nasion, vetores para glabela e dorso nasal
+  const anguloNasofrontal = angleBetween3Points(
+    p(LM.glabela),
+    p(LM.nasion),
+    p(LM.dorsumNasi)
+  );
+
+  // ── Ângulo nasolabial ──
+  // Vértice no subnasale, vetores para columella e labiale superior
+  const anguloNasolabial = angleBetween3Points(
+    p(LM.pronasale),
+    p(LM.subnasale),
+    p(LM.labialeSuperior)
+  );
+
+  // ── Largura nasal / Distância intercantal ──
+  const larguraNasal = dist2D(p(LM.alarRight), p(LM.alarLeft));
+  const distIntercantal = dist2D(p(LM.cantusRightMedial), p(LM.cantusLeftMedial));
+
+  // ── Largura labial ──
+  const larguraLabial = dist2D(p(LM.chelionRight), p(LM.chelionLeft));
+
+  return {
+    proporcaoAurea,
+    indiceFacial,
+    simetriaH: Math.min(simetriaH, 100),
+    simetriaV: Math.min(simetriaV, 100),
+    anguloNasofrontal,
+    anguloNasolabial,
+    tercoSuperior,
+    tercoMedio,
+    tercoInferior,
+    larguraBizigomatic,
+    larguraBigonial,
+    razaoBiZiBiGo,
+    larguraNasal,
+    distIntercantal,
+    larguraLabial,
+    alturaFacial,
+  };
+}
+
+// ── Draw landmarks overlay ──
+function drawLandmarksOnCanvas(canvasId, imgId, landmarks, imgWidth, imgHeight) {
+  const canvas = document.getElementById(canvasId);
+  const img = document.getElementById(imgId);
+  if (!canvas || !img) return;
+
+  // Match canvas resolution to displayed image
+  const rect = img.getBoundingClientRect();
+  canvas.width = rect.width * 2; // retina
+  canvas.height = rect.height * 2;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(2, 2);
+
+  const displayW = rect.width;
+  const displayH = rect.height;
+
+  // Calcular offset para object-fit: contain
+  const imgAspect = imgWidth / imgHeight;
+  const containerAspect = displayW / displayH;
+  let drawW, drawH, offsetX, offsetY;
+  if (imgAspect > containerAspect) {
+    drawW = displayW;
+    drawH = displayW / imgAspect;
+    offsetX = 0;
+    offsetY = (displayH - drawH) / 2;
+  } else {
+    drawH = displayH;
+    drawW = displayH * imgAspect;
+    offsetX = (displayW - drawW) / 2;
+    offsetY = 0;
+  }
+
+  const toScreen = (lm) => ({
+    x: offsetX + lm.x * drawW,
+    y: offsetY + lm.y * drawH,
+  });
+
+  // Draw all landmark dots (subtle)
+  ctx.fillStyle = 'rgba(24, 95, 165, 0.15)';
+  for (let i = 0; i < Math.min(landmarks.length, 468); i++) {
+    const s = toScreen(landmarks[i]);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Key landmarks with labels
+  const keyPoints = [
+    { idx: LM.trichion, label: 'Tr', color: '#185FA5' },
+    { idx: LM.glabela, label: 'G', color: '#185FA5' },
+    { idx: LM.nasion, label: 'N', color: '#185FA5' },
+    { idx: LM.pronasale, label: 'Prn', color: '#1D9E75' },
+    { idx: LM.subnasale, label: 'Sn', color: '#1D9E75' },
+    { idx: LM.labialeSuperior, label: 'Ls', color: '#C53030' },
+    { idx: LM.stomion, label: 'St', color: '#C53030' },
+    { idx: LM.mentonian, label: 'Me', color: '#185FA5' },
+    { idx: LM.zigoRight, label: 'Zy', color: '#D4A017' },
+    { idx: LM.zigoLeft, label: 'Zy', color: '#D4A017' },
+    { idx: LM.gonionRight, label: 'Go', color: '#D4A017' },
+    { idx: LM.gonionLeft, label: 'Go', color: '#D4A017' },
+  ];
+
+  keyPoints.forEach(kp => {
+    const s = toScreen(landmarks[kp.idx]);
+    ctx.fillStyle = kp.color;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = kp.color;
+    ctx.font = '500 9px system-ui, sans-serif';
+    ctx.fillText(kp.label, s.x + 5, s.y - 5);
+  });
+
+  // Draw reference lines
+  ctx.setLineDash([3, 3]);
+  ctx.lineWidth = 0.8;
+
+  // Linha média vertical
+  const tr = toScreen(landmarks[LM.trichion]);
+  const me = toScreen(landmarks[LM.mentonian]);
+  ctx.strokeStyle = 'rgba(24, 95, 165, 0.4)';
+  ctx.beginPath();
+  ctx.moveTo(tr.x, tr.y);
+  ctx.lineTo(me.x, me.y);
+  ctx.stroke();
+
+  // Linhas horizontais dos terços
+  ctx.strokeStyle = 'rgba(29, 158, 117, 0.4)';
+  const na = toScreen(landmarks[LM.nasion]);
+  const sn = toScreen(landmarks[LM.subnasale]);
+  [na, sn].forEach(pt => {
+    ctx.beginPath();
+    ctx.moveTo(pt.x - 40, pt.y);
+    ctx.lineTo(pt.x + 40, pt.y);
+    ctx.stroke();
+  });
+
+  // Linha BiZy
+  ctx.strokeStyle = 'rgba(212, 160, 23, 0.4)';
+  const zyR = toScreen(landmarks[LM.zigoRight]);
+  const zyL = toScreen(landmarks[LM.zigoLeft]);
+  ctx.beginPath();
+  ctx.moveTo(zyR.x, zyR.y);
+  ctx.lineTo(zyL.x, zyL.y);
+  ctx.stroke();
+
+  // Linha BiGo
+  const goR = toScreen(landmarks[LM.gonionRight]);
+  const goL = toScreen(landmarks[LM.gonionLeft]);
+  ctx.beginPath();
+  ctx.moveTo(goR.x, goR.y);
+  ctx.lineTo(goL.x, goL.y);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+}
+
+// ── Navigation ──
+window.goStage = function(n) {
+  document.getElementById('stage-' + currentStage).classList.remove('visible');
+  currentStage = n;
+  document.getElementById('stage-' + n).classList.add('visible');
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+};
+
+// ── File handling ──
+window.handleFile = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imageDataURL = e.target.result;
+    document.getElementById('vm-preview-img').src = imageDataURL;
+    document.getElementById('vm-preview-container').style.display = 'block';
+    document.getElementById('vm-drop').style.display = 'none';
+    document.getElementById('btn-analisar').disabled = !mediapipeReady;
+
+    // Show status
+    const statusEl = document.getElementById('vm-landmark-status');
+    statusEl.style.display = 'flex';
+    const dot = document.getElementById('lm-dot');
+    const txt = document.getElementById('lm-text');
+    if (mediapipeReady) {
+      dot.className = 'dot dot-ok';
+      txt.textContent = 'MediaPipe Face Landmarker pronto · 478 landmarks';
+    } else {
+      dot.className = 'dot dot-loading';
+      txt.textContent = 'Carregando MediaPipe Face Landmarker...';
+      const checkInterval = setInterval(() => {
+        if (mediapipeReady) {
+          dot.className = 'dot dot-ok';
+          txt.textContent = 'MediaPipe Face Landmarker pronto · 478 landmarks';
+          document.getElementById('btn-analisar').disabled = false;
+          clearInterval(checkInterval);
+        }
+      }, 500);
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+// ── Drag & drop ──
+const drop = document.getElementById('vm-drop');
+if (drop) {
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    drop.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('vm-file').files = dt.files;
+      handleFile({ target: { files: [file] } });
+    }
+  });
+}
+
+// ── Run Analysis (REAL MediaPipe) ──
+window.runAnalysis = async function() {
+  if (!faceLandmarker || !imageDataURL) return;
+
+  goStage(3);
+  document.getElementById('stage3-loading').style.display = 'block';
+  document.getElementById('stage3-content').style.display = 'none';
+  document.getElementById('stage3-loading-text').textContent = 'Detectando 478 landmarks faciais com MediaPipe...';
+
+  // Create offscreen image for MediaPipe
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = async () => {
+    try {
+      document.getElementById('stage3-loading-text').textContent = 'Processando landmarks...';
+
+      const result = faceLandmarker.detect(img);
+
+      if (!result.faceLandmarks || result.faceLandmarks.length === 0) {
+        document.getElementById('stage3-loading-text').textContent =
+          '⚠ Nenhuma face detectada. Verifique a qualidade da foto (frontal, boa iluminação).';
+        return;
+      }
+
+      rawLandmarks = result.faceLandmarks[0];
+      console.log(`Detectados ${rawLandmarks.length} landmarks`);
+
+      document.getElementById('stage3-loading-text').textContent = 'Calculando métricas geométricas...';
+
+      await new Promise(r => setTimeout(r, 300));
+
+      // Compute real metrics
+      computedMetrics = computeRealMetrics(rawLandmarks);
+      const m = computedMetrics;
+
+      // Show content
+      document.getElementById('stage3-loading').style.display = 'none';
+      document.getElementById('stage3-content').style.display = 'block';
+
+      // Set preview image
+      const previewImg2 = document.getElementById('vm-preview-img2');
+      previewImg2.src = imageDataURL;
+
+      // Wait for image to load then draw landmarks
+      previewImg2.onload = () => {
+        drawLandmarksOnCanvas('vm-canvas-metrics', 'vm-preview-img2', rawLandmarks, img.naturalWidth, img.naturalHeight);
+      };
+
+      // Render metric cards
+      const g1 = document.getElementById('metrics-grid');
+      const g2 = document.getElementById('metrics-grid2');
+
+      g1.innerHTML = [
+        renderMetricCard('Proporção áurea facial', m.proporcaoAurea.toFixed(3), 'índice (ref: 0.618)',
+          Math.abs(m.proporcaoAurea - 0.618) < 0.03 ? 'ok' : 'warn',
+          Math.abs(m.proporcaoAurea - 0.618) < 0.03 ? 'Na referência' : 'Fora da referência'),
+        renderMetricCard('Índice facial', m.indiceFacial.toFixed(2), 'altura / largura',
+          'info', m.indiceFacial < 0.85 ? 'Euriprosopo' : m.indiceFacial < 0.97 ? 'Mesoprosopo' : 'Leptoprosopo'),
+        renderMetricCard('Razão BiZi / BiGo', m.razaoBiZiBiGo.toFixed(2), 'relação larguras',
+          m.razaoBiZiBiGo >= 0.75 && m.razaoBiZiBiGo <= 0.85 ? 'ok' : 'warn',
+          m.razaoBiZiBiGo >= 0.75 && m.razaoBiZiBiGo <= 0.85 ? 'Harmônico' : 'Verificar'),
+        renderMetricCard('Terço superior', m.tercoSuperior.toFixed(1), '% da altura facial', 'info', ''),
+        renderMetricCard('Terço médio', m.tercoMedio.toFixed(1), '% da altura facial', 'info', ''),
+        renderMetricCard('Terço inferior', m.tercoInferior.toFixed(1), '% da altura facial', 'info', ''),
+      ].join('');
+
+      g2.innerHTML = [
+        renderMetricCard('Simetria horizontal', m.simetriaH.toFixed(1), '%',
+          m.simetriaH >= 95 ? 'ok' : 'warn', m.simetriaH >= 95 ? 'Boa' : 'Assimetria leve'),
+        renderMetricCard('Simetria vertical', m.simetriaV.toFixed(1), '%',
+          m.simetriaV >= 93 ? 'ok' : 'warn', m.simetriaV >= 93 ? 'Boa' : 'Assimetria leve'),
+        renderMetricCard('Ângulo nasofrontal', m.anguloNasofrontal.toFixed(1), 'graus',
+          m.anguloNasofrontal >= 130 && m.anguloNasofrontal <= 140 ? 'ok' : 'warn',
+          m.anguloNasofrontal >= 130 && m.anguloNasofrontal <= 140 ? 'Ideal' : 'Verificar'),
+        renderMetricCard('Ângulo nasolabial', m.anguloNasolabial.toFixed(1), 'graus',
+          m.anguloNasolabial >= 95 && m.anguloNasolabial <= 110 ? 'ok' : 'warn',
+          m.anguloNasolabial >= 95 && m.anguloNasolabial <= 110 ? 'Ideal' : 'Verificar'),
+        renderMetricCard('Largura nasal / intercantal', (m.larguraNasal / m.distIntercantal).toFixed(2), 'razão (ref: ~1.0)',
+          Math.abs(m.larguraNasal / m.distIntercantal - 1.0) < 0.15 ? 'ok' : 'warn',
+          Math.abs(m.larguraNasal / m.distIntercantal - 1.0) < 0.15 ? 'Proporcional' : 'Verificar'),
+        renderMetricCard('Largura bizigomatic', (m.larguraBizigomatic * 1000).toFixed(0), 'unid. relativa', 'info', ''),
+      ].join('');
+
+      document.getElementById('btn-ai').disabled = false;
+
+    } catch (err) {
+      console.error('Analysis error:', err);
+      document.getElementById('stage3-loading-text').textContent =
+        '⚠ Erro na análise: ' + err.message;
+    }
+  };
+  img.src = imageDataURL;
+};
+
+// ── Metric Card Renderer ──
+function renderMetricCard(label, value, unit, badgeClass, badgeText) {
+  return `<div class="vm-metric-card">
+    <div class="vm-metric-label">${label}</div>
+    <div class="vm-metric-value">${value}</div>
+    <div class="vm-metric-unit">${unit}</div>
+    ${badgeText ? `<div class="vm-metric-badge badge-${badgeClass}">${badgeText}</div>` : ''}
+  </div>`;
+}
+
+// ── AI Interpretation ──
+window.runAI = async function() {
+  if (!computedMetrics) return;
+  goStage(4);
+  document.getElementById('ai-status').style.display = 'flex';
+  document.getElementById('ai-result-wrap').style.display = 'none';
+
+  const m = computedMetrics;
+  const nome = document.getElementById('p-nome').value || 'Paciente';
+  const sexo = document.getElementById('p-sexo').value || 'não informado';
+
+  const prompt = `Você é o sistema VISAGEMED, assistente de análise facial geométrica para consultório de dermatologia do Dr. Paulo Reis Vulpi (CRM-MT 8274).
+
+Paciente: ${nome}, sexo ${sexo}.
+
+Métricas geométricas calculadas via landmarks reais MediaPipe Face Landmarker (478 pontos):
+- Proporção áurea facial (BiZy/altura): ${m.proporcaoAurea.toFixed(3)} (referência: 0.618)
+- Índice facial (altura/BiZy): ${m.indiceFacial.toFixed(2)} (euriprosopo <0.85, mesoprosopo 0.85-0.97, leptoprosopo >0.97)
+- Razão BiZigomático / BiGonial: ${m.razaoBiZiBiGo.toFixed(2)} (referência: 0.75-0.85)
+- Terços faciais: superior ${m.tercoSuperior.toFixed(1)}% / médio ${m.tercoMedio.toFixed(1)}% / inferior ${m.tercoInferior.toFixed(1)}% (referência: ~33.3% cada)
+- Simetria horizontal: ${m.simetriaH.toFixed(1)}%
+- Simetria vertical: ${m.simetriaV.toFixed(1)}%
+- Ângulo nasofrontal: ${m.anguloNasofrontal.toFixed(1)}° (referência: 130-140°)
+- Ângulo nasolabial: ${m.anguloNasolabial.toFixed(1)}° (referência: 95-110° feminino, 90-95° masculino)
+- Razão largura nasal / distância intercantal: ${(m.larguraNasal / m.distIntercantal).toFixed(2)} (referência: ~1.0)
+- Largura bizigomatic (relativa): ${(m.larguraBizigomatic * 1000).toFixed(0)}
+- Largura bigonial (relativa): ${(m.larguraBigonial * 1000).toFixed(0)}
+
+IMPORTANTE: Estas métricas foram extraídas de landmarks 2D em foto frontal. Os ângulos nasofrontal e nasolabial são aproximações bidimensionais — para precisão absoluta recomenda-se fotografia de perfil.
+
+Gere uma interpretação clínica estruturada com:
+1. Síntese das proporções faciais (2-3 frases)
+2. Análise de simetria (1-2 frases)
+3. Pontos de atenção clínica para procedimentos estéticos (2-3 frases)
+4. Observação técnica sobre limitações da análise frontal (1 frase)
+
+No final, em linhas separadas, informe:
+FORMATO_FACIAL: [oval/redondo/quadrado/retangular/triangular/diamante/coração]
+SIMETRIA: [Excelente/Boa/Leve assimetria/Assimetria moderada]
+
+Responda em português clínico formal, conciso.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const text = data.text;
+
+    const formatoMatch = text.match(/FORMATO_FACIAL:\s*([^\n]+)/i);
+    const simetriaMatch = text.match(/SIMETRIA:\s*([^\n]+)/i);
+
+    aiFormato = formatoMatch ? formatoMatch[1].trim() : '—';
+    aiSimetria = simetriaMatch ? simetriaMatch[1].trim() : '—';
+    aiText = text.replace(/FORMATO_FACIAL:[^\n]+/i, '').replace(/SIMETRIA:[^\n]+/i, '').trim();
+
+    document.getElementById('ai-status').style.display = 'none';
+    document.getElementById('ai-result-wrap').style.display = 'block';
+    document.getElementById('ai-result').innerText = aiText;
+    document.getElementById('ai-formato').innerText = aiFormato;
+    document.getElementById('ai-simetria').innerText = aiSimetria;
+    document.getElementById('btn-relatorio').disabled = false;
+
+    populatePDF();
+
+  } catch (err) {
+    document.getElementById('ai-status').innerHTML = '<span style="color:var(--color-text-danger, #C53030)">Erro ao consultar IA. Verifique a conexão.</span>';
+  }
+};
+
+// ── PDF Population ──
+function populatePDF() {
+  const nome = document.getElementById('p-nome').value || '—';
+  const nasc = document.getElementById('p-nasc').value || '—';
+  const sexo = document.getElementById('p-sexo').value || '—';
+  const queixa = document.getElementById('p-queixa').value || '—';
+  const now = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+  document.getElementById('pdf-date').innerText = now;
+  document.getElementById('pdf-nome').innerText = nome;
+  document.getElementById('pdf-nasc').innerText = nasc !== '—' ? new Date(nasc + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  document.getElementById('pdf-sexo').innerText = sexo;
+  document.getElementById('pdf-queixa').innerText = queixa;
+  document.getElementById('pdf-ai-text').innerText = aiText;
+  document.getElementById('pdf-formato').innerText = aiFormato;
+  document.getElementById('pdf-simetria').innerText = aiSimetria;
+
+  const m = computedMetrics;
+  const metricsList = [
+    ['Proporção áurea facial', m.proporcaoAurea.toFixed(3), 'ref: 0.618'],
+    ['Índice facial', m.indiceFacial.toFixed(2), 'altura/largura'],
+    ['Razão BiZi/BiGo', m.razaoBiZiBiGo.toFixed(2), 'ref: 0.75-0.85'],
+    ['Terços faciais', `${m.tercoSuperior.toFixed(1)}% / ${m.tercoMedio.toFixed(1)}% / ${m.tercoInferior.toFixed(1)}%`, 'sup/médio/inf'],
+    ['Simetria horizontal', m.simetriaH.toFixed(1) + '%', ''],
+    ['Simetria vertical', m.simetriaV.toFixed(1) + '%', ''],
+    ['Ângulo nasofrontal', m.anguloNasofrontal.toFixed(1) + '°', 'ref: 130-140°'],
+    ['Ângulo nasolabial', m.anguloNasolabial.toFixed(1) + '°', 'ref: 95-110°'],
+    ['Razão nasal/intercantal', (m.larguraNasal / m.distIntercantal).toFixed(2), 'ref: ~1.0'],
+  ];
+  document.getElementById('pdf-metrics-list').innerHTML = metricsList.map(([k, v, hint]) =>
+    `<div class="vm-pdf-row"><span class="vm-pdf-key">${k}${hint ? ' <span style="font-size:10px;color:var(--color-text-secondary);">(' + hint + ')</span>' : ''}</span><span class="vm-pdf-val">${v}</span></div>`
+  ).join('');
+}
+
+// ── Print & PDF download ──
+window.printReport = function() { window.print(); };
+
+window.downloadPDF = function() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+  const nome = document.getElementById('p-nome').value || '—';
+  const nasc = document.getElementById('p-nasc').value || '—';
+  const sexo = document.getElementById('p-sexo').value || '—';
+  const queixa = document.getElementById('p-queixa').value || '—';
+  const now = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+  const m = computedMetrics;
+
+  const pageW = 210, marginL = 20, marginR = 20, contentW = pageW - marginL - marginR;
+  let y = 20;
+
+  const addLine = (text, size=10, bold=false, color=[40,40,40]) => {
+    doc.setFontSize(size);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(text, contentW);
+    lines.forEach(line => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.text(line, marginL, y);
+      y += size * 0.45;
+    });
+    y += 1;
+  };
+
+  const addRule = () => {
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(marginL, y, pageW - marginR, y);
+    y += 4;
+  };
+
+  // Header
+  doc.setFillColor(24, 95, 165);
+  doc.rect(0, 0, pageW, 14, 'F');
+  doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+  doc.text('VISAGEMED — Laudo de Análise Facial Geométrica', marginL, 9.5);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.text(`Dr. Paulo Reis Vulpi  |  CRM-MT 8274  |  RQE 6055  |  ${now}`, pageW - marginR, 9.5, { align: 'right' });
+  y = 22;
+
+  // 1. Identificação
+  addLine('1. Identificação', 11, true, [24, 95, 165]);
+  addRule();
+  addLine(`Paciente: ${nome}`, 10);
+  addLine(`Data de nascimento: ${nasc !== '—' ? new Date(nasc + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}`, 10);
+  addLine(`Sexo: ${sexo}`, 10);
+  addLine(`Motivo: ${queixa}`, 10);
+  y += 4;
+
+  // 2. Métricas
+  addLine('2. Métricas Geométricas (MediaPipe 478 landmarks)', 11, true, [24, 95, 165]);
+  addRule();
+  const metrics = [
+    ['Proporção áurea facial', m.proporcaoAurea.toFixed(3), '(ref: 0.618)'],
+    ['Índice facial (altura/largura)', m.indiceFacial.toFixed(2), ''],
+    ['Razão BiZigomático/BiGonial', m.razaoBiZiBiGo.toFixed(2), '(ref: 0.75-0.85)'],
+    ['Terços: Superior / Médio / Inferior', `${m.tercoSuperior.toFixed(1)}% / ${m.tercoMedio.toFixed(1)}% / ${m.tercoInferior.toFixed(1)}%`, ''],
+    ['Simetria horizontal', m.simetriaH.toFixed(1) + '%', ''],
+    ['Simetria vertical', m.simetriaV.toFixed(1) + '%', ''],
+    ['Ângulo nasofrontal', m.anguloNasofrontal.toFixed(1) + '°', '(ref: 130-140°)'],
+    ['Ângulo nasolabial', m.anguloNasolabial.toFixed(1) + '°', '(ref: 95-110°)'],
+    ['Razão nasal/intercantal', (m.larguraNasal / m.distIntercantal).toFixed(2), '(ref: ~1.0)'],
+  ];
+  metrics.forEach(([k, v, hint]) => {
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
+    doc.text(k + (hint ? ' ' + hint : ''), marginL, y);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(40, 40, 40);
+    doc.text(v, pageW - marginR, y, { align: 'right' });
+    y += 6;
+  });
+  y += 4;
+
+  // 3. Interpretação
+  addLine('3. Interpretação Clínica', 11, true, [24, 95, 165]);
+  addRule();
+  addLine(aiText, 10, false, [40, 40, 40]);
+  y += 4;
+
+  // 4. Conclusão
+  addLine('4. Conclusão', 11, true, [24, 95, 165]);
+  addRule();
+  addLine(`Formato facial predominante: ${aiFormato}`, 10);
+  addLine(`Classificação de simetria: ${aiSimetria}`, 10);
+  y += 4;
+
+  // 5. Nota técnica
+  addLine('5. Nota Técnica', 11, true, [24, 95, 165]);
+  addRule();
+  addLine('Análise realizada via MediaPipe Face Landmarker (478 landmarks, modelo float16). Métricas angulares (nasofrontal, nasolabial) são aproximações bidimensionais obtidas de foto frontal. Para precisão absoluta destes ângulos, recomenda-se análise complementar em perfil.', 9, false, [100, 100, 100]);
+  y += 8;
+
+  // Footer
+  doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(150, 150, 150);
+  doc.text('Documento gerado pelo sistema VISAGEMED · Análise via MediaPipe Face Landmarker · Uso exclusivo para documentação clínica · Dr. Paulo Reis Vulpi · CRM-MT 8274', marginL, 285, { maxWidth: contentW });
+
+  const safeName = nome.replace(/\s+/g, '_').toLowerCase();
+  doc.save(`visagemed_${safeName}_${new Date().toISOString().slice(0,10)}.pdf`);
+};
+</script>
